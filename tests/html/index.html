@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!--    <script src="https://unpkg.com/konva@8/konva.min.js"></script>-->
+    <script src="../../umd/pikaso.min.js"></script>
+    <meta charset="utf-8"/>
+    <title>Konva Label Demo</title>
+</head>
+<style>
+    #container {
+        position: absolute;
+        width: 600px;
+        height: 600px;
+        top: 75px;
+    }
+</style>
+<body>
+<table>
+    <tr>
+        <td width="50%">
+            Circle Radius <input type="range" style="width: 100%;" value="2" max="100" min="-100"/>
+        </td>
+        <td>
+            path: <span id="path"></span>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <span> konva</span>
+            <div id="container" style="background-color:bisque;"></div>
+        </td>
+        <td></td>
+    </tr>
+</table>
+
+<script>
+    var s = 'Trieu Trung Hieu'
+    var editor = new Pikaso({
+        container: document.getElementById('container'),
+        width: 600,
+        height: 600,
+        containerClassName: 'containe',
+        selection: {
+            interactive: true,
+        },
+        transformer: {
+            borderStroke: 'green',
+            borderStrokeWidth: 1,
+            anchorBorderWidth: 1,
+            anchorSize: 15
+        }
+    });
+    console.log('editor', Konva.Path)
+    // editor.shapes.polygon.insert({
+    //     radius: 50,
+    //     sides: 5,
+    //     x: 100,
+    //     y: 150,
+    //     fill: 'red'
+    // });
+    // editor.shapes.text.insert({
+    //     text: 'Trieu Trung Hieu',
+    //     fontSize: 22
+    // });
+    const svg_shape = editor.shapes.svg.insert({
+        text: s,
+        data: 'M0,0 A100,100 0 0,0 199.49899732081087,0',
+        stroke: 'red',
+        x: 200,
+        y: 200,
+        scaleX: 1,
+        scaleY: 1,
+        strokeWidth: 2
+    });
+
+    var txt = editor.shapes.textPath.insert({
+        text: s,
+        data: 'M0,0 A100,100 0 0,0 199.49899732081087,0',
+        letterSpacing: 3,
+        x: 200,
+        y: 200,
+        draggable: true,
+        fill: '#333',
+        fontSize: 22,
+        fontFamily: 'Arial',
+        align: 'center',
+        textBaseline: "middle"
+    });
+    // console.log('svg_shape', svg_shape)
+    window.addEventListener('resize', () => {
+        editor.board.rescale()
+    })
+    // editor.shapes.pencil.draw({
+    //     stroke: 'tomato',
+    //     strokeWidth: 10
+    // })
+
+    // console.log('txt', txt.node.text())
+    for (let e of document.querySelectorAll('input[type="range"]')) {
+        e.addEventListener('input', () => {
+            let r = 650 - Math.abs(parseFloat(e.value) * 6);
+            let l = getTextWidth(txt) + 50;
+            let d = getArcPath(l, r, parseFloat(e.value) > 0 ? 0 : 1)
+            // console.log('l', d)
+            document.querySelector("#path").innerHTML=d;
+            txt.update({
+                data: d
+            });
+            svg_shape.update({
+                data: d
+            });
+            // canvas.renderAll();
+        });
+    }
+    let txtText = editor.shapes.text.insert({
+            text: '안녕하세요~',
+            fontFamily: txt.node.fontFamily(),
+            fontSize: txt.node.fontSize(),
+            fontStyle: txt.node.fontStyle(),
+            fontVariant: txt.node.fontVariant(),
+            letterSpacing: txt.node.letterSpacing(),
+            wrap: 'none',
+            verticalAlign: "top",
+            width: 150,
+            x: 200,
+            y: 20,
+            rotation: 90
+        });
+    editor.shapes.text.insert({
+        text: '안녕하세요~',
+        fontFamily: txt.node.fontFamily(),
+        fontSize: txt.node.fontSize(),
+        fontStyle: txt.node.fontStyle(),
+        fontVariant: txt.node.fontVariant(),
+        letterSpacing: txt.node.letterSpacing(),
+        wrap: 'char',
+        verticalAlign: "top",
+        width: 20,
+        height: 250,
+        x: 150,
+        y: 20,
+        rotation: 0
+    });
+    editor.shapes.text.insert({
+        text: 'Hello~',
+        fontFamily: txt.node.fontFamily(),
+        fontSize: txt.node.fontSize(),
+        fontStyle: txt.node.fontStyle(),
+        fontVariant: txt.node.fontVariant(),
+        letterSpacing: txt.node.letterSpacing(),
+        wrap: 'none',
+        verticalAlign: "top",
+        width: 150,
+        x: 240,
+        y: 20,
+        rotation: 90
+    });
+    editor.shapes.text.insert({
+        text: '안녕하세요~',
+        fontFamily: txt.node.fontFamily(),
+        fontSize: txt.node.fontSize(),
+        fontStyle: txt.node.fontStyle(),
+        fontVariant: txt.node.fontVariant(),
+        letterSpacing: txt.node.letterSpacing(),
+        wrap: 'none',
+        verticalAlign: "top",
+        width:150,
+        x: 250,
+        y: 20,
+        rotation: 0
+    });
+    editor.shapes.text.insert({
+        text: 'Hello~',
+        fontFamily: txt.node.fontFamily(),
+        fontSize: txt.node.fontSize(),
+        fontStyle: txt.node.fontStyle(),
+        fontVariant: txt.node.fontVariant(),
+        letterSpacing: txt.node.letterSpacing(),
+        wrap: 'none',
+        verticalAlign: "top",
+        width:150,
+        x: 250,
+        y: 60,
+        rotation: 0
+    });
+    function getTextWidth(txtPath) {
+        // let txtText = editor.shapes.text.insert({
+        //     text: txtPath.node.text(),
+        //     fontFamily: txtPath.node.fontFamily(),
+        //     fontSize: txtPath.node.fontSize(),
+        //     fontStyle: txtPath.node.fontStyle(),
+        //     fontVariant: txtPath.node.fontVariant(),
+        //     letterSpacing: txtPath.node.letterSpacing(),
+        // });
+        // let w = txtText.node.measureSize().width;
+        // txtText.delete()
+        let w = txtPath.node.getSelfRect().width;
+        console.log('txtPath', w)
+        // let w = svg_shape.width();
+        return w + 5;
+        // console.log(txtText.node.measureSize())
+        // delete txtText;
+        // console.log(txtPath.node.measureSize(txtPath.node.text()).width)
+        // let atxt = new Konva.Text();
+        // atxt.fontFamily(txtPath.fontFamily());
+        // atxt.letterSpacing(txtPath.letterSpacing());
+        // atxt.fontSize(txtPath.fontSize());
+        // atxt.fontStyle(txtPath.fontStyle());
+        // atxt.fontVariant(txtPath.fontVariant());
+        // let w = atxt.measureSize(txt.text()).width;
+        // delete atxt;
+        // return w + 5;
+    }
+    function getArcPath(l, r, sweepFlag) {
+        const upc = true;
+
+        const n = (l / (2 * Math.PI * r)) * (Math.PI * 2);
+        const n2 = n / 2;
+        const largeArcFlag = n > Math.PI ? 1 : 0;
+
+        //js math. sin /cos 用的是弧度不是角度
+        const ax = Math.abs(r * Math.sin(n2));
+        const ay = Math.abs(r * Math.cos(n2));
+
+        let x1, y1, x2, y2;
+        x1 = r - ax;
+        x2 = r + ax;
+        if (n > 180) {
+            if (upc)
+                y1 = y2 = r + ay;
+            else
+                y1 = y2 = r - ay;
+        } else if (n == 180) {
+            x1 = 0;
+            y1 = 0;
+            x2 = r * 2;
+            y2 = 0;
+        } else {
+            if (upc)
+                y1 = y2 = r - ay;
+            else
+                y1 = y2 = r + ay;
+        }
+        x2 -= x1, y2 -= y1, x1 = 0, y1 = 0;
+
+        return `M${x1},${y1} A${r},${r} 0 ${largeArcFlag},${sweepFlag} ${x2},${y2}`
+    }
+</script>
+</body>
+
+</html>

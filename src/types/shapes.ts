@@ -10,6 +10,7 @@ import type { EllipseDrawer } from '../shape/drawers/EllipseDrawer'
 import type { PolygonDrawer } from '../shape/drawers/PolygonDrawer'
 import type { TriangleDrawer } from '../shape/drawers/TriangleDrawer'
 import type { TextDrawer } from '../shape/drawers/TextDrawer'
+import type { TextPathDrawer } from '../shape/drawers/TextPathDrawer'
 import type { PencilDrawer } from '../shape/drawers/PencilDrawer'
 import { SvgDrawer } from '../shape/drawers/SvgDrawer'
 
@@ -25,6 +26,7 @@ export declare interface BaseShapes {
   triangle: TriangleDrawer
   polygon: PolygonDrawer
   text: TextDrawer
+  textPath: TextPathDrawer
   pencil: PencilDrawer
   svg: SvgDrawer
 }

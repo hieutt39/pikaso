@@ -3,6 +3,7 @@ import Konva from 'konva'
 export enum DrawType {
   Svg = 'Svg',
   Text = 'Text',
+  TextPath = 'TextPath',
   Pencil = 'Pencil',
   Line = 'Line',
   Arrow = 'Arrow',
