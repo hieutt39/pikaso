@@ -8,6 +8,11 @@ import {ShapeModel} from '../../ShapeModel'
 import {DrawType, TextPathConfig} from '../../../types'
 
 export class TextPathModel extends ShapeModel<Konva.TextPath, Konva.TextPathConfig> {
+  /**
+   * add more original text no format
+   */
+  private orgText: string
+
   constructor(board: Board, node: Konva.TextPath, config: TextPathConfig = {}) {
     super(board, node, config)
     node.on('dblclick', this.inlineEdit.bind(this))
@@ -18,6 +23,21 @@ export class TextPathModel extends ShapeModel<Konva.TextPath, Konva.TextPathConf
    */
   public get type(): string {
     return 'textPath'
+  }
+
+  /**
+   * Returns the original content of Text
+   */
+  public getOrgText() {
+    return this.orgText
+  }
+
+  /**
+   * Set Content to origin text
+   * @param orgText
+   */
+  public setOrgText(orgText: string) {
+    this.orgText = orgText
   }
 
   /**
@@ -105,11 +125,14 @@ export class TextPathModel extends ShapeModel<Konva.TextPath, Konva.TextPathConf
       }
 
       // update label's text
-      this.node.text(newText)
-
+      // this.node.text(newText)
+      // update original text
+      this.setOrgText(newText)
       // this.node.show()
-      this.node.setAttrs({
-        draggable: this.board.settings.selection?.interactive
+      console.log('this.node', this.node)
+      this.update({
+        draggable: this.board.settings.selection?.interactive,
+        text: newText
       })
 
       // select node
