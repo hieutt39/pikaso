@@ -109,6 +109,9 @@ export class TextPathModel extends ShapeModel<Konva.TextPath, Konva.TextPathConf
       textAlign: this.node.align(),
       color: '#fff'
     })
+    if (isBrowser()) {
+      input.addEventListener('keyup', this.onKeyUp.bind(this))
+    }
 
     input.addEventListener('blur', (e: Event) => {
       input.parentNode?.removeChild(input)
@@ -129,7 +132,6 @@ export class TextPathModel extends ShapeModel<Konva.TextPath, Konva.TextPathConf
       // update original text
       this.setOrgText(newText)
       // this.node.show()
-      console.log('this.node', this.node)
       this.update({
         draggable: this.board.settings.selection?.interactive,
         text: newText
@@ -169,5 +171,31 @@ export class TextPathModel extends ShapeModel<Konva.TextPath, Konva.TextPathConf
     const selection = window.getSelection()!
     selection.removeAllRanges()
     selection.addRange(range)
+  }
+
+  /**
+   * Handles global keyboard events
+   *
+   * @param e The keyboard event
+   */
+  private onKeyUp(
+    e: Event & {
+      key: string
+      metaKey: boolean
+      ctrlKey: boolean
+      shiftKey: boolean
+    }
+  ) {
+    // const isSpecialKey = e.metaKey || e.ctrlKey
+    // const isShiftKey = e.shiftKey === true
+    // const key = e.key.toLowerCase()
+    // @ts-ignore
+    const newText = convertHtmlToText((<HTMLSpanElement>e.target).innerHTML)
+    this.board.events.emit('textPath:update-text', {
+      shapes: [this],
+      data: {
+        text: newText
+      }
+    })
   }
 }
