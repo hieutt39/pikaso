@@ -28,7 +28,7 @@ export class LabelModel extends ShapeModel<Konva.Label, Konva.LabelConfig> {
     super(board, node, config)
 
     this.config = config
-    this.orgText = node.getText().text()
+    // this.orgText = node.getText().text()
     node.on('transform', this.transform.bind(this))
     node.on('dblclick', this.inlineEdit.bind(this))
   }
