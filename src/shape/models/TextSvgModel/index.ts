@@ -424,12 +424,12 @@ export class TextSvgModel extends ShapeModel<Konva.Group, Konva.GroupConfig> {
    */
   // eslint-disable-next-line @typescript-eslint/member-ordering
   public setPercent(percent: number) {
-    // this._sync()
     this.textPathNode.setAttrs({
       draggable: false,
       data: this.getTextLength(percent)
     })
     console.log('Update Data')
+    this._sync()
     this.updateTransformer()
   }
 }
