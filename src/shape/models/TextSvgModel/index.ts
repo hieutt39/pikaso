@@ -373,8 +373,14 @@ export class TextSvgModel extends ShapeModel<Konva.Group, Konva.GroupConfig> {
   }
 
   private calCurvatureLength() {
-    let length = this.textPathNode._getTextSize(this.orgText).width + 5
-    return length
+    const letterSpacing = this.textPathNode.letterSpacing()
+    // @ts-ignore
+    const length = this.textPathNode._getTextSize(this.textPathNode.text).width
+    const textWidth = Math.max(
+      length + ((this.textPathNode.text || '').length - 1) * letterSpacing,
+      0
+    )
+    return textWidth
   }
 
   /**
