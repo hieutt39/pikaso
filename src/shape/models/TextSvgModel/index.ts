@@ -442,7 +442,7 @@ export class TextSvgModel extends ShapeModel<Konva.Group, Konva.GroupConfig> {
     }
     x2 -= x1, y2 -= y1, x1 = 0, y1 = 0
     // return `M${x1},${y1} a${r},${r} 0 ${largeArcFlag},${sweepFlag} ${x2},${y2}`
-    return `M 0 ${r} a ${r / 2} ${r / 2} 0 1 1 1 0`
+    return `M 0 0 a ${r} ${r} 0 1 1 1 0`
   }
 
   /**
