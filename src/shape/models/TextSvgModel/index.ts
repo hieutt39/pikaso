@@ -296,7 +296,7 @@ export class TextSvgModel extends ShapeModel<Konva.Group, Konva.GroupConfig> {
         height: sRect.height
       })
 
-      if (this.labelRefer) { // && !this.labelRefer.isVisible) {
+      if (this.labelRefer && !this.labelRefer.isVisible) {
         try {
           this.labelRefer.setOrgText(this.getOrgText())
           // Sync Position for Label
