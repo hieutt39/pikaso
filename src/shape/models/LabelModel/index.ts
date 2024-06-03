@@ -38,7 +38,6 @@ export class LabelModel extends ShapeModel<Konva.Label, Konva.LabelConfig> {
     node.getTag().on('fillChange', this.tagFillChange.bind(this))
     node.getText().on('fontFamilyChange', this.sync.bind(this))
     node.getText().on('fontSizeChange', this.sync.bind(this))
-    node.getText().on('textChange', this.textChange.bind(this))
     node.getText().on('letterSpacingChange', this.sync.bind(this))
 
   }
