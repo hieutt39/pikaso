@@ -7,6 +7,7 @@ import {ShapeModel} from '../../ShapeModel'
 import {isBrowser, isNode} from '../../../utils/detect-environment'
 import {rotateAroundCenter} from '../../../utils/rotate-around-center'
 import {DrawType, LabelConfig} from '../../../types'
+import {TextSvgModel} from '../TextSvgModel'
 
 export class LabelModel extends ShapeModel<Konva.Label, Konva.LabelConfig> {
   /**
@@ -23,6 +24,8 @@ export class LabelModel extends ShapeModel<Konva.Label, Konva.LabelConfig> {
    * add more original text no format
    */
   private orgText: string
+
+  private referTextSvg: TextSvgModel
 
   constructor(board: Board, node: Konva.Label, config: LabelConfig = {}) {
     super(board, node, config)
@@ -335,5 +338,22 @@ export class LabelModel extends ShapeModel<Konva.Label, Konva.LabelConfig> {
     this.updateText({
       fontSize: Math.ceil(fontSize / scale.x)
     })
+  }
+
+  /**
+   * Set Label for sync data when TextSvg change anything
+   * @param referTextSvg
+   */
+  // eslint-disable-next-line @typescript-eslint/member-ordering
+  public setReferTextSvg(referTextSvg: TextSvgModel) {
+    this.referTextSvg = referTextSvg
+  }
+
+  /**
+   * Return refer TextSvgModel object
+   */
+  // eslint-disable-next-line @typescript-eslint/member-ordering
+  public getReferTextSvg() {
+    return this.referTextSvg
   }
 }
