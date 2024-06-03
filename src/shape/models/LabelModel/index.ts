@@ -312,4 +312,28 @@ export class LabelModel extends ShapeModel<Konva.Label, Konva.LabelConfig> {
       }
     })
   }
+
+  /**
+   * return fontSize of Text
+   * @param attributes
+   */
+  // eslint-disable-next-line @typescript-eslint/member-ordering
+  public getFontSize(): number {
+    const node = this.textNode
+    const scale = node.getAbsoluteScale()
+    let fontSize = Math.ceil(node.fontSize() * scale.x)
+    return fontSize
+  }
+
+  /**
+   * Set fontSize for Text by Scale
+   * @param fontSize
+   */
+  public setFontSize(fontSize: number) {
+    const node = this.textNode
+    const scale = node.getAbsoluteScale()
+    this.updateText({
+      fontSize: Math.ceil(fontSize / scale.x)
+    })
+  }
 }
