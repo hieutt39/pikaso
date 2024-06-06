@@ -435,9 +435,9 @@ export class LabelModel extends ShapeModel<Konva.Label, Konva.LabelConfig> {
 
   /**
    * Sync position between shapes
-   * @private
+   * @public
    */
-  private syncPosition() {
+  public syncPosition() {
     const rect = this.node.getClientRect()
     const refRect = this.referShape.node.getClientRect()
     const refAttr = this.referShape.node.attrs
