@@ -321,13 +321,6 @@ export class TextSvgModel extends ShapeModel<Konva.Group, Konva.GroupConfig> {
             letterSpacing: textPathAttrs.letterSpacing,
             orgText: textPathAttrs.orgText
           })
-
-          // Set attributes for Label from TextSvg
-          this.referShape.node.setAttrs({
-            scaleX: scale.x,
-            scaleY: scale.y,
-            rotation: this.node.getAttr('rotation')
-          })
         } catch (e) {
           console.log('Error:', e)
         }
@@ -353,7 +346,6 @@ export class TextSvgModel extends ShapeModel<Konva.Group, Konva.GroupConfig> {
   private sync(e: Konva.KonvaEventObject<MouseEvent>) {
     this._syncAttrs()
     this.updateTransformer()
-    this.syncPosition()
   }
 
   /**
@@ -362,15 +354,18 @@ export class TextSvgModel extends ShapeModel<Konva.Group, Konva.GroupConfig> {
    * @private
    */
   private transformend(e: Konva.KonvaEventObject<MouseEvent>) {
-    this._syncAttrs()
+    if (this.referShape && !this.referShape.isVisible) {
+      this.referShape.node.setAttrs({
+        scaleX: this.node.getAbsoluteScale().x,
+        scaleY: this.node.getAbsoluteScale().y
+      })
+    }
     this.updateTransformer()
-    this.syncPosition()
   }
 
   private textChange(e: Konva.KonvaEventObject<MouseEvent>) {
     this._syncAttrs()
     this.updateTransformer()
-    this.syncPosition()
   }
 
   private dragendChange(e: Konva.KonvaEventObject<MouseEvent>) {

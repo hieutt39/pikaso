@@ -29,6 +29,7 @@ export class LabelModel extends ShapeModel<Konva.Label, Konva.LabelConfig> {
     super(board, node, config)
     this.config = config
     node.on('transform', this.transform.bind(this))
+    node.on('transformend', this.transformend.bind(this))
     node.on('dblclick', this.inlineEdit.bind(this))
     node.on('rotationChange', this.rotationChange.bind(this))
     node.on('dragend', this.syncPosition.bind(this))
@@ -37,6 +38,7 @@ export class LabelModel extends ShapeModel<Konva.Label, Konva.LabelConfig> {
     node.getText().on('fontSizeChange', this.sync.bind(this))
     node.getText().on('letterSpacingChange', this.sync.bind(this))
     node.getText().on('textChange', this.textChange.bind(this))
+    this._syncAttrs()
   }
 
   /**
@@ -137,15 +139,25 @@ export class LabelModel extends ShapeModel<Konva.Label, Konva.LabelConfig> {
     ) {
       this.textNode.setAttrs({
         width: Math.max(this.node.width() * this.node.scaleX(), 30),
-        scaleX: this.node.scaleY(),
         wrap: 'word'
       })
-
-      this.node.scaleX(this.textNode.scaleY())
-      this.tagNode.scaleX(this.node.scaleY())
-
-      this.syncPosition()
+      this.node.scaleX(this.node.scaleY())
     }
+  }
+
+  /**
+   * Sync fontsize after changing every thing
+   * @param e
+   * @private
+   */
+  private transformend(e: Konva.KonvaEventObject<MouseEvent>) {
+    if (this.referShape && !this.referShape.isVisible) {
+      this.referShape.node.setAttrs({
+        scaleX: this.node.getAbsoluteScale().x,
+        scaleY: this.node.getAbsoluteScale().y
+      })
+    }
+    this.updateTransformer()
   }
 
   /**
@@ -255,7 +267,7 @@ export class LabelModel extends ShapeModel<Konva.Label, Konva.LabelConfig> {
         width: this.textNode.width()
       })
 
-      if (this.referShape) {
+      if (this.referShape && !this.referShape.isVisible) {
         this.referShape.setOrgText(newText)
       }
 
@@ -387,7 +399,6 @@ export class LabelModel extends ShapeModel<Konva.Label, Konva.LabelConfig> {
     let tag = this.tagNode
     if (text && tag) {
       const textAttrs = text.getAttrs()
-      const scale = this.node.getAbsoluteScale()
 
       if (this.referShape && !this.referShape.isVisible) {
         try {
@@ -402,12 +413,9 @@ export class LabelModel extends ShapeModel<Konva.Label, Konva.LabelConfig> {
 
           // Set attributes for Label from TextSvg
           this.referShape.node.setAttrs({
-            scaleX: scale.x,
-            scaleY: scale.y,
             rotation: this.node.getAttr('rotation')
           })
           this.syncPosition()
-          console.log('this.referShape.node', this.referShape.node)
         } catch (e) {
           console.log('Error:', e)
         }
