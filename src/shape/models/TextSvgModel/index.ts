@@ -172,7 +172,6 @@ export class TextSvgModel extends ShapeModel<Konva.Group, Konva.GroupConfig> {
       })
       if (this.referShape) {
         this.referShape.setOrgText(newText)
-        this.syncPosition()
       }
 
       // select node
@@ -332,6 +331,7 @@ export class TextSvgModel extends ShapeModel<Konva.Group, Konva.GroupConfig> {
         } catch (e) {
           console.log('Error:', e)
         }
+        this.syncPosition()
       }
     }
   }
@@ -381,7 +381,6 @@ export class TextSvgModel extends ShapeModel<Konva.Group, Konva.GroupConfig> {
     this.referShape.node.setAttrs({
       rotation: this.node.getAttr('rotation')
     })
-    this.syncPosition()
   }
 
   private tagFillChange(e: Konva.KonvaEventObject<MouseEvent>) {
