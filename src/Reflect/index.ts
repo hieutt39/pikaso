@@ -65,7 +65,7 @@ export class Reflect {
             scaleX: attrs.scaleX,
             scaleY: attrs.scaleY,
             skewX: attrs.skewX,
-            skewY: attrs.skewY,
+            skewY: attrs.skewY
           })
         } else {
           this.reflectImage.node.setAttrs({
@@ -82,9 +82,10 @@ export class Reflect {
 
         this.reflectImage.node.clearCache()
         this.reflectImage.node.setAttr('image', img)
-        this.reflectImage.node.sceneFunc((ctx, shape) => {
-          this.reflectionImage(ctx, shape)
-        })
+        // this.reflectImage.node.sceneFunc((ctx, shape) => {
+        //   this.reflectionImage(ctx, shape)
+        // })
+        this.changeConfig()
       })
       this.shape.rotate(theta)
     } else {
@@ -92,6 +93,11 @@ export class Reflect {
     }
   }
 
+  public changeConfig() {
+    this.reflectImage.node.sceneFunc((ctx, shape) => {
+      this.reflectionImage(ctx, shape)
+    })
+  }
   /**
    * Update config
    * @param config
