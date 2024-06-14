@@ -55,19 +55,28 @@ export class Reflect {
       this.shape.rotate(0)
       this.shape.node.toImage().then(img => {
         if (this.shape.type === 'textSvg') {
+          const attrs = this.shape.node.getAttrs()
           const rect = this.shape.node.getClientRect()
           this.reflectImage.node.setAttrs({
             x: rect.x,
             y: rect.y,
             width: rect.width,
-            height: rect.height
+            height: rect.height,
+            scaleX: attrs.scaleX,
+            scaleY: attrs.scaleY,
+            skewX: attrs.skewX,
+            skewY: attrs.skewY,
           })
         } else {
           this.reflectImage.node.setAttrs({
             x: this.shape.node.x(),
             y: this.shape.node.y(),
             width: this.shape.node.width(),
-            height: this.shape.node.height()
+            height: this.shape.node.height(),
+            scaleX: this.shape.node.scaleX(),
+            scaleY: this.shape.node.scaleY(),
+            skewX: this.shape.node.skewX(),
+            skewY: this.shape.node.skewY()
           })
         }
 
