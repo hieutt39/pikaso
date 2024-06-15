@@ -14,19 +14,88 @@ export class Reflect {
   config: ReflectConfig
   shape: ShapeModel
   reflectImage: ImageModel
+  reflectHeight: ShapeModel
 
-  constructor(shape: ShapeModel, reflectImage: ImageModel) {
+  constructor(shape: ShapeModel) {
     this.config = {
       isReflect: false,
-      opacity: 1,
+      opacity: 0.8,
       offset: 1,
-      reflectHeight: 1,
+      reflectHeight: 0.6,
       ...shape.node.attrs.reflection
     }
+    shape.node.attrs = {
+      reflection: this.config,
+      ...shape.node.attrs
+    }
     this.shape = shape
-    this.reflectImage = reflectImage
   }
 
+  public setImageToReflect(image: ImageModel) {
+    this.reflectImage = image
+    this._init()
+    this.hide()
+  }
+
+  public show() {
+    this.config.isReflect = true
+    this.shape.node.attrs.reflection.isReflect = true
+    this.reflectImage.show()
+  }
+
+  public hide() {
+    this.config.isReflect = false
+    this.shape.node.attrs.reflection.isReflect = false
+    this.reflectImage.hide()
+  }
+
+  /**
+   * Draw image and reflection and position
+   */
+  private _init(isReload: boolean = false) {
+    const theta = this.shape.node.rotation()
+    this.shape.rotate(0)
+    this.shape.node.toImage().then(img => {
+      if (!isReload) {
+        this.reflectImage.node.setAttrs({
+          x: this.shape.node.x(),
+          y: this.shape.node.y()
+        })
+      }
+      this.reflectImage.node.setAttrs({
+        width: this.shape.node.width(),
+        height: this.shape.node.height(),
+        scaleX: 1,
+        scaleY: 1
+        // scaleX: this.shape.node.scaleX(),
+        // scaleY: this.shape.node.scaleY(),
+        // skewX: this.shape.node.skewX(),
+        // skewY: this.shape.node.skewY()
+      })
+      this.reflectImage.node.clearCache()
+      this.reflectImage.node.setAttr('image', img)
+      this.configChange()
+    })
+    this.shape.rotate(theta)
+  }
+
+  /**
+   * Re-Draw for new image exclude position
+   */
+  public reload() {
+    this._init(true)
+    if (this.config.isReflect) {
+      this.show()
+    } else {
+      this.hide()
+    }
+  }
+
+  /**
+   * redraw Reflection for image data
+   * @param ctx
+   * @param shape
+   */
   public reflectionImage(ctx: Konva.Context, shape: Konva.Image) {
     let reflectionHeight = shape.height() * this.config.reflectHeight
     const img = shape.getAttr('image')
@@ -48,63 +117,21 @@ export class Reflect {
     ctx.restore()
   }
 
-  public reloadReflection() {
-    if (this.config.isReflect) {
-      this.reflectImage.show()
-      const theta = this.shape.node.rotation()
-      this.shape.rotate(0)
-      this.shape.node.toImage().then(img => {
-        if (this.shape.type === 'textSvg') {
-          const attrs = this.shape.node.getAttrs()
-          const rect = this.shape.node.getClientRect()
-          this.reflectImage.node.setAttrs({
-            x: rect.x,
-            y: rect.y,
-            width: rect.width,
-            height: rect.height,
-            scaleX: attrs.scaleX,
-            scaleY: attrs.scaleY,
-            skewX: attrs.skewX,
-            skewY: attrs.skewY
-          })
-        } else {
-          this.reflectImage.node.setAttrs({
-            x: this.shape.node.x(),
-            y: this.shape.node.y(),
-            width: this.shape.node.width(),
-            height: this.shape.node.height(),
-            scaleX: this.shape.node.scaleX(),
-            scaleY: this.shape.node.scaleY(),
-            skewX: this.shape.node.skewX(),
-            skewY: this.shape.node.skewY()
-          })
-        }
-
-        this.reflectImage.node.clearCache()
-        this.reflectImage.node.setAttr('image', img)
-        // this.reflectImage.node.sceneFunc((ctx, shape) => {
-        //   this.reflectionImage(ctx, shape)
-        // })
-        this.changeConfig()
-      })
-      this.shape.rotate(theta)
-    } else {
-      this.reflectImage.hide()
-    }
-  }
-
-  public changeConfig() {
+  /**
+   * only apply Reflection when Change configuration
+   */
+  // eslint-disable-next-line @typescript-eslint/member-ordering
+  public configChange() {
     this.reflectImage.node.sceneFunc((ctx, shape) => {
       this.reflectionImage(ctx, shape)
     })
   }
+
   /**
-   * Update config
-   * @param config
+   * return height of image after Reflection
    */
-  public updateConfig(config: ReflectConfig) {
-    this.config = { ...config }
-    this.shape.node.attrs.reflection = this.config
-    this.reloadReflection()
+  public getReflectHeight() {
+    let reflectionHeight = this.shape.height() * this.config.reflectHeight
+    return reflectionHeight + this.config.offset
   }
 }

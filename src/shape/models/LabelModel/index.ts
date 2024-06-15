@@ -37,9 +37,9 @@ export class LabelModel extends ShapeModel<Konva.Label, Konva.LabelConfig> {
   constructor(board: Board, node: Konva.Label, config: LabelConfig = {}) {
     super(board, node, config)
     this.config = config
+    node.on('dblclick', this.inlineEdit.bind(this))
     node.on('transform', this.transform.bind(this))
     node.on('transformend', this.transformend.bind(this))
-    node.on('dblclick', this.inlineEdit.bind(this))
     node.on('dragend', this.dragend.bind(this))
     node.on('dragmove', this.dragmove.bind(this))
     node.getTag().on('fillChange', this.tagFillChange.bind(this))
@@ -47,6 +47,7 @@ export class LabelModel extends ShapeModel<Konva.Label, Konva.LabelConfig> {
     node.getText().on('fontSizeChange', this.sync.bind(this))
     node.getText().on('letterSpacingChange', this.sync.bind(this))
     node.getText().on('textChange', this.textChange.bind(this))
+    this.reflection = new Reflect(this)
     this._syncAttrs()
   }
 
@@ -155,7 +156,7 @@ export class LabelModel extends ShapeModel<Konva.Label, Konva.LabelConfig> {
       this.node.scaleX(this.node.scaleY())
     }
     // Sync position for Reflect
-    this.syncReflectPosition()
+    // this.syncReflectPosition('TRANSFORM')
     this.updateTransformer()
   }
 
@@ -434,7 +435,7 @@ export class LabelModel extends ShapeModel<Konva.Label, Konva.LabelConfig> {
         }
       }
       if (this.reflectShape) {
-        this.reflection.reloadReflection()
+        this.reflection.reload()
       }
     }
   }
@@ -465,7 +466,7 @@ export class LabelModel extends ShapeModel<Konva.Label, Konva.LabelConfig> {
         }
       }
       if (this.reflectShape) {
-        this.reflection.reloadReflection()
+        this.reflection.reload()
       }
     }
   }
@@ -493,7 +494,7 @@ export class LabelModel extends ShapeModel<Konva.Label, Konva.LabelConfig> {
         y: center.y - (refRect.height / 2 - deltaY)
       })
     }
-    this.syncReflectPosition()
+    // this.syncReflectPosition()
   }
 
   /**
@@ -501,20 +502,20 @@ export class LabelModel extends ShapeModel<Konva.Label, Konva.LabelConfig> {
    * @public
    */
   // eslint-disable-next-line @typescript-eslint/member-ordering
-  public syncReflectPosition() {
+  public syncReflectPosition(type: string = 'MOVE') {
     if (this.reflectShape) {
       this.reflectShape.node.setAttrs({
         x: this.node.x(),
         y: this.node.y(),
         width: this.node.width(),
         height: this.node.height(),
-        rotation: this.node.rotation(),
-        draggable: false
+        // scaleX: 1,
+        // scaleY: 1
+        scaleX: this.node.scaleX(),
+        scaleY: this.node.scaleY(),
+        skewX: this.node.skewX(),
+        skewY: this.node.skewY()
       })
-      this.reflectShape.deselect()
-      this.reflectShape.config.history = false
-      this.reflectShape.config.internal = false
-      this.reflectShape.config.selectable = false
     }
   }
 
@@ -559,10 +560,8 @@ export class LabelModel extends ShapeModel<Konva.Label, Konva.LabelConfig> {
   // eslint-disable-next-line @typescript-eslint/member-ordering
   public setReflectShape(reflectShape: ImageModel) {
     this.reflectShape = reflectShape
-    this.reflectShape.node.setZIndex(0)
-    this.reflectShape.deselect()
-    this.reflection = new Reflect(this, reflectShape)
-    this.reflection.reloadReflection()
+    this.reflection.setImageToReflect(reflectShape)
+    this.initReflectShape()
   }
 
   /**
@@ -571,5 +570,15 @@ export class LabelModel extends ShapeModel<Konva.Label, Konva.LabelConfig> {
   // eslint-disable-next-line @typescript-eslint/member-ordering
   public getReflectShape() {
     return this.reflection
+  }
+
+  private initReflectShape() {
+    if (this.reflectShape) {
+      const zIndex = this.node.getZIndex()
+      this.reflectShape.node.setZIndex(zIndex)
+      this.node.setZIndex(zIndex + 1)
+      this.reflectShape.node.setDraggable(false)
+      this.reflectShape.deselect()
+    }
   }
 }

@@ -1,14 +1,14 @@
 import Konva from 'konva'
 
-import { convertHtmlToText } from '../../../utils/html-to-text'
-import { Board } from '../../../Board'
-import { isBrowser, isNode } from '../../../utils/detect-environment'
-import { rotateAroundCenter } from '../../../utils/rotate-around-center'
-import { ShapeModel } from '../../ShapeModel'
-import { LabelModel } from '../LabelModel'
-import { DrawType, TextSvgConfig } from '../../../types'
-import { Reflect } from '../../../Reflect'
-import { ImageModel } from '../ImageModel'
+import {convertHtmlToText} from '../../../utils/html-to-text'
+import {Board} from '../../../Board'
+import {isBrowser, isNode} from '../../../utils/detect-environment'
+import {rotateAroundCenter} from '../../../utils/rotate-around-center'
+import {ShapeModel} from '../../ShapeModel'
+import {LabelModel} from '../LabelModel'
+import {DrawType, TextSvgConfig} from '../../../types'
+import {Reflect} from '../../../Reflect'
+import {ImageModel} from '../ImageModel'
 
 export class TextSvgModel extends ShapeModel<Konva.Group, Konva.GroupConfig> {
   /**
@@ -43,7 +43,8 @@ export class TextSvgModel extends ShapeModel<Konva.Group, Konva.GroupConfig> {
     node.find('TextPath')[0].on('alignChange', this.sync.bind(this))
     node.find('TextPath')[0].on('fillChange', this.sync.bind(this))
     node.find('Tag')[0].on('fillChange', this.tagFillChange.bind(this))
-      this._syncAttrs()
+    this._syncAttrs()
+    this.reflection = new Reflect(this)
   }
 
   /**
@@ -79,7 +80,7 @@ export class TextSvgModel extends ShapeModel<Konva.Group, Konva.GroupConfig> {
    * @param orgText
    */
   public setOrgText(orgText: string) {
-    this.updateText({ orgText: orgText, text: orgText })
+    this.updateText({orgText: orgText, text: orgText})
   }
 
   /**
@@ -298,6 +299,7 @@ export class TextSvgModel extends ShapeModel<Konva.Group, Konva.GroupConfig> {
   public updateText(attributes: Partial<Konva.TextPathConfig>) {
     // this.board.history.create(this.board.layer, this.textPathNode)
     this.textPathNode.setAttrs(attributes)
+    this.syncReflectPosition()
     this.updateTransformer()
   }
 
@@ -315,9 +317,11 @@ export class TextSvgModel extends ShapeModel<Konva.Group, Konva.GroupConfig> {
 
   private _syncAttrs() {
     let textPath = this.textPathNode
+    const sRect = textPath.getSelfRect()
+    this.node.width(sRect.width)
+    this.node.height(sRect.height)
     let tag = this.tagNode
     if (textPath && tag) {
-      const sRect = textPath.getSelfRect()
       const textPathAttrs = textPath.getAttrs()
       tag.setAttrs({
         x: sRect.x,
@@ -375,7 +379,7 @@ export class TextSvgModel extends ShapeModel<Konva.Group, Konva.GroupConfig> {
       })
     }
     // Sync position for Reflect
-    this.syncReflectPosition()
+    this.syncReflectPosition('TRANSFORM')
     this.updateTransformer()
   }
 
@@ -428,6 +432,9 @@ export class TextSvgModel extends ShapeModel<Konva.Group, Konva.GroupConfig> {
           console.log('Error:', e)
         }
       }
+      if (this.reflectShape) {
+        this.reflection.reload()
+      }
     }
   }
 
@@ -453,9 +460,8 @@ export class TextSvgModel extends ShapeModel<Konva.Group, Konva.GroupConfig> {
         x: center.x - (refRect.width / 2 - deltaX),
         y: center.y - (refRect.height / 2 - deltaY)
       })
-
-      this.syncReflectPosition()
     }
+    // this.syncReflectPosition()
   }
 
   /**
@@ -463,29 +469,39 @@ export class TextSvgModel extends ShapeModel<Konva.Group, Konva.GroupConfig> {
    * @public
    */
   // eslint-disable-next-line @typescript-eslint/member-ordering
-  public syncReflectPosition() {
+  public syncReflectPosition(type: string = 'MOVE') {
     if (this.reflectShape) {
-      const rect = this.node.getClientRect()
-      this.reflectShape.node.setAttrs({
-        x: rect.x,
-        y: rect.y,
-        width: rect.width,
-        height: rect.height,
-        rotation: this.node.rotation(),
-        draggable: false
+      const rectClient = this.node.getClientRect()
+      const attr = this.tagNode.attrs
+      const refRect = this.reflectShape.node.getClientRect()
+      const refAttr = this.reflectShape.node.attrs
+      // Moving
+      const center = {
+        x: rectClient.x + rectClient.width / 2,
+        y: rectClient.y + rectClient.height / 2
+      }
+
+      const deltaX = Math.abs(refAttr.x - refRect.x)
+      const deltaY = Math.abs(refAttr.y - refRect.y)
+      this.reflectShape.node.setPosition({
+        x: center.x - (refRect.width / 2 - deltaX),
+        y: center.y - (refRect.height / 2 - deltaY)
       })
-      this.reflectShape.deselect()
-      this.reflectShape.config.history = false
-      this.reflectShape.config.internal = false
-      this.reflectShape.config.selectable = false
-      // this.reflectShape.config.transformer = {
-      //   resizeEnabled: false,
-      //   rotateEnabled: false,
-      //   rotateLineVisible: false,
-      //   useSingleNodeRotation: false,
-      //   borderEnabled: false,
-      //   anchorSize: 0
-      // }
+      // Transform
+      if (type === 'TRANSFORM') {
+        // const deltaW = Math.abs(refAttr.width - refRect.width)
+        // const deltaH = Math.abs(refAttr.height - refRect.height)
+
+        this.reflectShape.node.setAttrs({
+          // width: attr.width * this.node.scaleX(),
+          // height: attr.height * this.node.scaleY()
+          width: attr.width,
+          height: attr.height,
+          scaleX: this.node.scaleX(),
+          scaleY: this.node.scaleX(),
+          rotation: this.node.rotation()
+        })
+      }
     }
   }
 
@@ -530,10 +546,9 @@ export class TextSvgModel extends ShapeModel<Konva.Group, Konva.GroupConfig> {
   // eslint-disable-next-line @typescript-eslint/member-ordering
   public setReflectShape(reflectShape: ImageModel) {
     this.reflectShape = reflectShape
-    this.reflectShape.node.setZIndex(0)
     this.reflectShape.deselect()
-    this.reflection = new Reflect(this, reflectShape)
-    this.reflection.reloadReflection()
+    this.reflection.setImageToReflect(reflectShape)
+    this.initReflectShape()
   }
 
   /**
@@ -542,5 +557,15 @@ export class TextSvgModel extends ShapeModel<Konva.Group, Konva.GroupConfig> {
   // eslint-disable-next-line @typescript-eslint/member-ordering
   public getReflectShape() {
     return this.reflection
+  }
+
+  private initReflectShape() {
+    if (this.reflectShape) {
+      const zIndex = this.node.getZIndex()
+      this.reflectShape.node.setZIndex(zIndex)
+      this.node.setZIndex(zIndex + 1)
+      this.reflectShape.node.setDraggable(false)
+      this.reflectShape.deselect()
+    }
   }
 }
